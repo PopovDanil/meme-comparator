@@ -1,7 +1,7 @@
 import cv2
+import numpy as np
 from insightface.app import FaceAnalysis
 from insightface.utils import face_align
-from torch import tensor
 
 from settings import settings
 
@@ -15,7 +15,7 @@ class FaceDetector:
         self.detector.prepare(ctx_id=self.device, det_size=settings.face_detector_img_size)
 
 
-    def detect(self, img: tensor) -> tuple[tensor, tensor]:
+    def detect(self, img: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         faces = self.detector.get(img)
 
         if not faces:
@@ -23,8 +23,8 @@ class FaceDetector:
 
         landmarks = faces[0].kps
         embedding = faces[0].embedding
+
         cropped = face_align.norm_crop(img, landmarks, image_size=settings.face_detector_out_size)
-        # print(faces)
 
         if settings.debug:
             cv2.imwrite('./src/debug/face.jpg', cropped)

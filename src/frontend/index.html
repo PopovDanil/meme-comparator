@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Camera + Meme UI</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    .panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #333;
+    }
+
+    video {
+      max-width: 95%;
+      max-height: 95%;
+      border-radius: 10px;
+      border: 2px solid #444;
+    }
+
+    img {
+      max-width: 95%;
+      max-height: 95%;
+      border-radius: 10px;
+      border: 2px solid #444;
+      object-fit: contain;
+    }
+
+    .status {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left: Camera -->
+    <div class="panel">
+      <video id="camera" autoplay playsinline></video>
+    </div>
+
+    <!-- Right: Meme -->
+    <div class="panel">
+      <img
+        id="meme"
+        src="https://i.imgflip.com/1bij.jpg"
+        alt="Meme"
+      />
+    </div>
+  </div>
+
+  <div class="status" id="status">Connecting...</div>
+
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <script>
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("canvas");
+    const status = document.getElementById("status");
+
+    // Change this to your backend WebSocket URL
+    const WS_URL = "ws://localhost:5050/ws";
+
+    let socket;
+
+    function connectWebSocket() {
+      socket = new WebSocket(WS_URL);
+
+      socket.onopen = () => {
+        status.innerText = "WebSocket connected";
+        console.log("WS connected");
+      };
+
+      socket.onclose = () => {
+        status.innerText = "WebSocket disconnected — retrying...";
+        console.log("WS disconnected");
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      socket.onerror = (err) => {
+        console.error("WS error:", err);
+      };
+    }
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+        video.srcObject = stream;
+      } catch (err) {
+        alert("Camera access denied or unavailable");
+        console.error(err);
+      }
+    }
+
+    function sendFrame() {
+      if (!socket || socket.readyState !== WebSocket.OPEN) return;
+      if (video.videoWidth === 0) return;
+
+      const ctx = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      ctx.drawImage(video, 0, 0);
+
+      // Compress frame as JPEG
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+
+      socket.send(JSON.stringify({
+        type: "frame",
+        image: dataUrl,
+        timestamp: Date.now()
+      }));
+    }
+
+    // Send frames 5x per second (adjustable)
+    setInterval(sendFrame, 200);
+
+    connectWebSocket();
+    startCamera();
+  </script>
+
+</body>
+</html>

@@ -3,3 +3,5 @@
 *pycache*
 *debug*
 test_images
+meme_storage
+*.faiss
