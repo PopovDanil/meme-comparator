@@ -11,6 +11,9 @@ from settings import settings
 
 
 def prepare() -> None:
+    if os.path.exists(settings.faiss_index_path):
+        return
+
     db = Database()
     fd = FaceDetector()
     eg = EmbeddingGenerator()
