@@ -10,5 +10,6 @@ if __name__ == '__main__':
     prepare()
     uvicorn.run(
         settings.uvicorn_app_name,
-        port=settings.uvicorn_server_port
+        port=settings.uvicorn_server_port,
+        host=settings.uvicorn_server_host
     )

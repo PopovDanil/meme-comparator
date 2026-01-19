@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     uvicorn_app_name: str = 'backend.api:app'
     uvicorn_server_port: int = 5050
+    uvicorn_server_host: str = '0.0.0.0'
     template_path: str = './src/frontend'
 
     faiss_index_path: str = './meme_storage/db.faiss'
@@ -22,7 +23,7 @@ class Settings(BaseSettings):
 
     meme_storage: str = './meme_storage/' # stores images in jpeg format
 
-    debug: bool = True # debug mode
+    debug: bool = False # debug mode
 
 
 settings = Settings()

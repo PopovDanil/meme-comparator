@@ -12,6 +12,7 @@ from settings import settings
 
 def prepare() -> None:
     if os.path.exists(settings.faiss_index_path):
+        print('Skipping db initialization!')
         return
 
     db = Database()
