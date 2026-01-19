@@ -2,10 +2,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    face_detector_device: int = -1
-    face_detector_model: str = 'buffalo_l'
+    face_detector_device: int = -1 # default device (cpu) for face detector
+    face_detector_model: str = 'buffalo_l' # default model (weakest)
     face_detector_img_size: tuple = (640, 640)
-    face_detector_out_size: int = 224
+    face_detector_out_size: int = 224 # should be divisible by 112
 
     face_embedding_size: int = 512
 
@@ -20,7 +20,9 @@ class Settings(BaseSettings):
     open_clip_model: str = 'ViT-B-32'
     open_clip_weights: str = 'laion2b_s34b_b79k'
 
-    debug: bool = True
+    meme_storage: str = './meme_storage/' # stores images in jpeg format
+
+    debug: bool = True # debug mode
 
 
 settings = Settings()
