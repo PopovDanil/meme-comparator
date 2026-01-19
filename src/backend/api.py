@@ -10,7 +10,7 @@ from PIL import Image
 from starlette.templating import _TemplateResponse
 
 from backend.database import Database
-from backend.embedding_generator import generate_embedding
+from backend.embedding_generator import EmbeddingGenerator
 from backend.face_detector import FaceDetector
 
 # from backend.utils import top_k_sampling
@@ -19,6 +19,7 @@ from settings import settings
 app = FastAPI()
 db = Database()
 face_detector = FaceDetector()
+emb_gen = EmbeddingGenerator()
 templates = Jinja2Templates(
     directory=settings.template_path
 )
@@ -82,11 +83,11 @@ async def get_frames(ws: WebSocket):
                 img = np.asarray(img)
 
                 # Crop face, get embedding (optimally _ can be replaced)
-                cropped_face, _ = face_detector.detect(img)
-                emb = generate_embedding(cropped_face) # get CLIP embedding
+                cropped_face, emb = face_detector.detect(img)
+                em_emb, _ = emb_gen.generate_embedding(cropped_face)
 
                 # Look for most similar vectors (optionally choose randomly)
-                _, ids = db.query(emb)
+                _, ids = db.query(em_emb)
                 # selected = top_k_sampling(ids[0])
                 selected = ids[0][0]
 

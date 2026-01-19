@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     face_detector_img_size: tuple = (640, 640)
     face_detector_out_size: int = 224 # should be divisible by 112
 
-    face_embedding_size: int = 512
+    face_embedding_size: int = 7
 
     uvicorn_app_name: str = 'backend.api:app'
     uvicorn_server_port: int = 5050

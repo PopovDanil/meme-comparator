@@ -1,6 +1,9 @@
+import tensorflow as tf
 import uvicorn
 
 from settings import settings
+
+tf.config.set_visible_devices([], "GPU")
 
 if __name__ == '__main__':
     uvicorn.run(

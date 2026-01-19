@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from insightface.app import FaceAnalysis
-from insightface.utils import face_align
 
 from settings import settings
 
@@ -39,10 +38,40 @@ class FaceDetector:
         embedding = faces[0].embedding
 
         # Extract face from photo
-        cropped = face_align.norm_crop(img, landmarks, image_size=settings.face_detector_out_size)
+        cropped = self.expanded_crop(img=img, face=faces[0])
+        # cropped = face_align.norm_crop(img, landmarks, image_size=settings.face_detector_out_size)
 
         # Optionally save face
         if settings.debug:
             cv2.imwrite('./src/debug/face.jpg', cropped)
 
         return cropped, embedding
+
+
+    def expanded_crop(self, img: np.ndarray, face: dict, scale=1.6)-> np.ndarray:
+        """
+        Expands the cropped image to include more pixels from original photo to
+        avoid under-sensitivity of search.
+
+        Args:
+            img (np.ndarray): original image
+            face (dict): cropped face
+            scale (float, optional): scaling. Defaults to 1.6.
+
+        Returns:
+            np.ndarray: cropped face.
+        """
+        h, w, _ = img.shape
+        x1, y1, x2, y2 = map(int, face.bbox)
+
+        cx = (x1 + x2) // 2
+        cy = (y1 + y2) // 2
+
+        size = int(max(x2 - x1, y2 - y1) * scale)
+
+        nx1 = max(0, cx - size // 2)
+        ny1 = max(0, cy - size // 2)
+        nx2 = min(w, cx + size // 2)
+        ny2 = min(h, cy + size // 2)
+
+        return img[ny1:ny2, nx1:nx2]
